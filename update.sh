@@ -13,7 +13,7 @@ echo "=============================="
 
 # Function to get the latest NordVPN version
 get_latest_nordvpn_version() {
-    echo -e "${YELLOW}Fetching latest NordVPN version...${NC}"
+    echo -e "${YELLOW}Fetching latest NordVPN version...${NC}" >&2
     local versions=$(curl -s https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/ | \
         grep -o 'nordvpn_[0-9]\+\.[0-9]\+\.[0-9]\+_' | \
         sed 's/nordvpn_//;s/_$//' | \
@@ -37,6 +37,10 @@ download_file() {
     
     # Download with wget
     if wget -O "$dest.tmp" "$url"; then
+        # Calculate SHA256 hash
+        local hash=$(sha256sum "$dest.tmp" | cut -d' ' -f1)
+        echo "SHA256: $hash"
+        
         mv "$dest.tmp" "$dest"
         echo -e "${GREEN}✓ Successfully downloaded ${desc}${NC}"
         return 0
