@@ -2,7 +2,6 @@
   autoPatchelfHook,
   buildFHSEnvChroot,
   dpkg,
-  fetchurl,
   lib,
   stdenv,
   sysctl,
@@ -15,18 +14,17 @@
   zlib,
   wireguard-tools,
   icu72,
+  libnl,
+  libcap_ng,
 }: let
   pname = "nordvpn";
-  version = "3.18.3";
+  version = "3.20.3";
 
   # NordVPN requires an old libxml2 version (2.x with .so.2)
   # We'll use Debian's package which is compatible
   libxml2Legacy = stdenv.mkDerivation {
     name = "libxml2-legacy";
-    src = fetchurl {
-      url = "http://ftp.debian.org/debian/pool/main/libx/libxml2/libxml2_2.9.14+dfsg-1.3~deb12u1_amd64.deb";
-      hash = "sha256-NbdstwOPwclAIEpPBfM/+3nQJzU85Gk5fZrc+Pmz4ac=";
-    };
+    src = ./vendor/libxml2/libxml2_2.9.14_dfsg-1.3_deb12u1_amd64.deb;
     
     nativeBuildInputs = [ dpkg ];
     
@@ -43,12 +41,14 @@
   nordVPNBase = stdenv.mkDerivation {
     inherit pname version;
 
-    src = fetchurl {
-      url = "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/nordvpn_${version}_amd64.deb";
-      hash = "sha256-pCveN8cEwEXdvWj2FAatzg89fTLV9eYehEZfKq5JdaY=";
-    };
+    src = if stdenv.hostPlatform.system == "x86_64-linux" then
+      ./vendor/nordvpn/x86_64-linux/nordvpn_3.20.3_amd64.deb
+    else if stdenv.hostPlatform.system == "aarch64-linux" then
+      ./vendor/nordvpn/aarch64-linux/nordvpn_3.20.3_arm64.deb
+    else
+      throw "Unsupported platform: ${stdenv.hostPlatform.system}";
 
-    buildInputs = [libidn2 icu72];
+    buildInputs = [libidn2 icu72 libnl libcap_ng];
     nativeBuildInputs = [dpkg autoPatchelfHook stdenv.cc.cc.lib];
 
     dontConfigure = true;
@@ -94,6 +94,8 @@
       zlib
       wireguard-tools
       icu72
+      libnl
+      libcap_ng
     ];
     
     # Set up library paths for the FHS environment
