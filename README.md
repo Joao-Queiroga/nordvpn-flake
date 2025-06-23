@@ -55,6 +55,10 @@ This will:
 - Add specified users to the `nordvpn` group
 - Configure `networking.firewall.checkReversePath = false`
 
+#### Example Configuration
+
+See [dotfiles](https://github.com/conneroisu/dotfiles) for a complete example configuration namely [`flake.nix`](https://github.com/conneroisu/dotfiles/blob/main/flake.nix) and [`engineer.nix`](https://github.com/conneroisu/dotfiles/blob/main/modules/features/engineer.nix).
+
 ## Usage
 
 After rebuilding your system:
