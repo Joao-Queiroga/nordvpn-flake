@@ -6,18 +6,21 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ]
-    (system:
-      let
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+  }:
+    flake-utils.lib.eachSystem ["x86_64-linux" "aarch64-linux"]
+    (
+      system: let
         pkgs = import nixpkgs {
           inherit system;
           config.allowUnfree = true;
         };
-        
+
         nordvpn = pkgs.callPackage ./nordvpn.nix {};
-      in
-      {
+      in {
         packages = {
           default = nordvpn;
           inherit nordvpn;
@@ -26,6 +29,9 @@
         apps = {
           default = {
             type = "app";
+            meta = {
+              description = "NordVPN CLI";
+            };
             program = "${nordvpn}/bin/nordvpn";
           };
         };
@@ -49,10 +55,18 @@
           '';
         };
       }
-    ) // {
+    )
+    // {
       nixosModules = {
         default = self.nixosModules.nordvpn;
         nordvpn = import ./module.nix;
+      };
+
+      overlays = {
+        default = self.overlays.nordvpn;
+        nordvpn = final: prev: {
+          nordvpn = final.callPackage ./nordvpn.nix {};
+        };
       };
     };
 }
