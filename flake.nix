@@ -20,7 +20,7 @@
       {
         packages = {
           default = nordvpn;
-          nordvpn = nordvpn;
+          inherit nordvpn;
         };
 
         apps = {
@@ -34,7 +34,7 @@
           buildInputs = with pkgs; [
             nixd
             nil
-            nixfmt-rfc-style
+            alejandra
             statix
             deadnix
           ];

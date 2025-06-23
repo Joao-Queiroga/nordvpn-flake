@@ -87,7 +87,6 @@ in
       description = "CLI client for NordVPN";
       homepage = "https://www.nordvpn.com";
       license = licenses.unfreeRedistributable;
-      maintainers = with maintainers; [dr460nf1r3];
       platforms = ["x86_64-linux" "aarch64-linux"];
     };
   }
