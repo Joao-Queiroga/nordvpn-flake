@@ -4,12 +4,14 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
   };
 
   outputs = {
     self,
     nixpkgs,
     flake-utils,
+    hercules-ci-effects,
   }:
     flake-utils.lib.eachSystem ["x86_64-linux" "aarch64-linux"]
     (
@@ -66,6 +68,30 @@
         default = self.overlays.nordvpn;
         nordvpn = final: prev: {
           nordvpn = final.callPackage ./nordvpn.nix {};
+        };
+      };
+
+      herculesCI = herculesCI: {
+        ciSystems = ["x86_64-linux" "aarch64-linux"];
+        onPush.default.outputs = {
+          packages.x86_64-linux = ["nordvpn"];
+          packages.aarch64-linux = ["nordvpn"];
+          checks.x86_64-linux = ["all"];
+          checks.aarch64-linux = ["all"];
+        };
+        onSchedule.update = {
+          when = {
+            hour = [2];
+            dayOfWeek = ["Mon"];
+          };
+          outputs = {
+            effects = {
+              flake-update = hercules-ci-effects.lib.mkEffect {
+                src = self;
+                settings.autoMergeMethod = "merge";
+              };
+            };
+          };
         };
       };
     };
