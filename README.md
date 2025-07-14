@@ -68,7 +68,8 @@ After rebuilding your system:
 nordvpn login
 
 # Connect to a server
-nordvpn connect
+# nordvpn connect
+nordvpn c 
 
 # Check connection status
 nordvpn status

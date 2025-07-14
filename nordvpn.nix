@@ -25,13 +25,13 @@
   libxml2Legacy = stdenv.mkDerivation {
     name = "libxml2-legacy";
     src = ./vendor/libxml2/libxml2_2.9.14_dfsg-1.3_deb12u1_amd64.deb;
-    
-    nativeBuildInputs = [ dpkg ];
-    
+
+    nativeBuildInputs = [dpkg];
+
     unpackPhase = ''
       dpkg-deb -x $src .
     '';
-    
+
     installPhase = ''
       mkdir -p $out
       cp -r usr/lib $out/
@@ -41,12 +41,12 @@
   nordVPNBase = stdenv.mkDerivation {
     inherit pname version;
 
-    src = if stdenv.hostPlatform.system == "x86_64-linux" then
-      ./vendor/nordvpn/x86_64-linux/nordvpn_3.20.3_amd64.deb
-    else if stdenv.hostPlatform.system == "aarch64-linux" then
-      ./vendor/nordvpn/aarch64-linux/nordvpn_3.20.3_arm64.deb
-    else
-      throw "Unsupported platform: ${stdenv.hostPlatform.system}";
+    src =
+      if stdenv.hostPlatform.system == "x86_64-linux"
+      then ./vendor/nordvpn/x86_64-linux/nordvpn_3.20.3_amd64.deb
+      else if stdenv.hostPlatform.system == "aarch64-linux"
+      then ./vendor/nordvpn/aarch64-linux/nordvpn_3.20.3_arm64.deb
+      else throw "Unsupported platform: ${stdenv.hostPlatform.system}";
 
     buildInputs = [libidn2 icu72 libnl libcap_ng];
     nativeBuildInputs = [dpkg autoPatchelfHook stdenv.cc.cc.lib];
@@ -71,10 +71,12 @@
 
     # Skip autoPatchelfHook for nordvpnd since we'll patch it manually
     autoPatchelfIgnoreMissingDeps = ["libxml2.so.2"];
-    
+
     postFixup = ''
       # Manually patch nordvpnd with the correct rpath
-      patchelf --set-rpath "${libxml2Legacy}/lib/x86_64-linux-gnu:${libidn2}/lib:${icu72}/lib:${stdenv.cc.cc.lib}/lib" $out/bin/nordvpnd
+      patchelf \
+        --set-rpath "${libxml2Legacy}/lib/x86_64-linux-gnu:${libidn2}/lib:${icu72}/lib:${stdenv.cc.cc.lib}/lib" \
+        $out/bin/nordvpnd
     '';
   };
 
@@ -97,7 +99,7 @@
       libnl
       libcap_ng
     ];
-    
+
     # Set up library paths for the FHS environment
     profile = ''
       export LD_LIBRARY_PATH="${libxml2Legacy}/lib/x86_64-linux-gnu:${icu72}/lib:$LD_LIBRARY_PATH"
