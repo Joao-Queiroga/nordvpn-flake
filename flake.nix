@@ -71,13 +71,15 @@
     // {
       nixosModules = {
         default = self.nixosModules.nordvpn;
-        nordvpn = import ./module.nix;
+        nordvpn =
+          import ./module.nix {inherit nordvpn-amd64-deb nordvpn-arm64-deb;};
       };
-
       overlays = {
         default = self.overlays.nordvpn;
         nordvpn = final: prev: {
-          nordvpn = final.callPackage ./nordvpn.nix {};
+          nordvpn = final.callPackage ./nordvpn.nix {
+            inherit nordvpn-amd64-deb nordvpn-arm64-deb;
+          };
         };
       };
 
